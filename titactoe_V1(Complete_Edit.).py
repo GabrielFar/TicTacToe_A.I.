@@ -1,3 +1,4 @@
+import random
 table = {1: [0, 0], 2: [0, 1], 3: [0, 2], 4: [1, 0], 5: [1, 1], 6: [1, 2], 7: [2, 0], 8: [2, 1], 9: [2, 2]}
 curr_player = "X"
 
@@ -65,15 +66,25 @@ def get_open_spaces(board):
                 possible_moves[board[i][j]] = 0
     return possible_moves
 
-def minimax(board, player):
+def minimax(board, player, counter_medium_bot, counter_easy_bot):
     possible_moves = get_open_spaces(board)
     
     for move in possible_moves:
         board[table[move][0]][table[move][1]] = player
         winner = check_win(board)
         if winner == 0 and len(possible_moves) > 1:
-            options = minimax(board, change_player(player))
-            possible_moves[move] = get_better_option(options, change_player(player))
+            options = minimax(board, change_player(player), counter_medium_bot, counter_easy_bot)
+            if bot_dificulty == "3":
+                possible_moves[move] = get_better_option(options, change_player(player))
+            elif bot_dificulty == "1":
+                possible_moves[move] = get_better_option(options, player)
+            else:
+                if counter_medium_bot:
+                    possible_moves[move] = get_better_option(options, change_player(player))
+                    counter_medium_bot -= 1
+                else:
+                    possible_moves[move] = get_better_option(options, player)
+
         else:
             possible_moves[move] = winner
 
@@ -82,15 +93,30 @@ def minimax(board, player):
     return possible_moves
     
 
+mode = ""
+while mode != "1" and mode != "2":
+    mode = input("Would you like to play solo (1) or with a friend (2)? ")
+
+bot_dificulty = ""
+if mode == "1":
+    while bot_dificulty not in ["1" ,"2", "3"]:
+        bot_dificulty = input("Select the bot difficulty:\n1: Easy\n2: Medium\n3: Hard\n")
+
 while True:
+    counter_medium_bot = 3
+    counter_easy_bot = 1
     board = start_game()
     for i in range(9):
 
-        if curr_player == "O":
-            options = minimax(board, curr_player)
-            move = list(options.keys())[list(options.values()).index(get_better_option(options, curr_player))]
+        if curr_player == "O" and mode == "1":
+            if bot_dificulty == "1" and counter_easy_bot:
+                counter_easy_bot -= 1
+                move = random.choice(list(get_open_spaces(board).keys()))
+            else:
+                options = minimax(board, curr_player, counter_medium_bot, counter_easy_bot)
+                move = list(options.keys())[list(options.values()).index(get_better_option(options, curr_player))]
         else:
-            print(f"\nYour turn!")
+            print(f"\n{curr_player}'s turn!")
             show_game(board)
             move = input("Make your move: ")
             while not check_play(move, board):

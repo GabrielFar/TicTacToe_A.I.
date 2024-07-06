@@ -1,3 +1,7 @@
+import random
+table = {1: [0, 0], 2: [0, 1], 3: [0, 2], 4: [1, 0], 5: [1, 1], 6: [1, 2], 7: [2, 0], 8: [2, 1], 9: [2, 2]}
+curr_player = "X"
+
 def show_game(board):
     print()
     for row in range(3):
@@ -54,12 +58,16 @@ def get_better_option(possible_moves, player):
         return max(list(possible_moves.values()))
     return min(list(possible_moves.values()))
 
-def minimax(board, player):
+def get_open_spaces(board):
     possible_moves = dict()
     for i in range(3):
         for j in range(3):
             if type(board[i][j]) is int:
                 possible_moves[board[i][j]] = 0
+    return possible_moves
+
+def minimax(board, player):
+    possible_moves = get_open_spaces(board)
     
     for move in possible_moves:
         board[table[move][0]][table[move][1]] = player
@@ -73,17 +81,19 @@ def minimax(board, player):
         board[table[move][0]][table[move][1]] = move
 
     return possible_moves
-    
-table = {1: [0, 0], 2: [0, 1], 3: [0, 2], 4: [1, 0], 5: [1, 1], 6: [1, 2], 7: [2, 0], 8: [2, 1], 9: [2, 2]}
-curr_player = "X"
 
 while True:
+    counter_easy_bot = 1
     board = start_game()
     for i in range(9):
 
         if curr_player == "O":
-            options = minimax(board, curr_player)
-            move = list(options.keys())[list(options.values()).index(get_better_option(options, curr_player))]
+            if counter_easy_bot:
+                counter_easy_bot -= 1
+                move = random.choice(list(get_open_spaces(board).keys()))
+            else:
+                options = minimax(board, curr_player)
+                move = list(options.keys())[list(options.values()).index(get_better_option(options, curr_player))]
         else:
             print(f"\nYour turn!")
             show_game(board)
