@@ -55,24 +55,22 @@ def get_better_option(possible_moves, player):
     return min(list(possible_moves.values()))
 
 def minimax(board, player):
-    copy_board = list()
     possible_moves = dict()
     for i in range(3):
-        copy_board.append(board[i].copy())
         for j in range(3):
             if type(board[i][j]) is int:
                 possible_moves[board[i][j]] = 0
     
     for move in possible_moves:
-        copy_board[table[move][0]][table[move][1]] = player
-        winner = check_win(copy_board)
+        board[table[move][0]][table[move][1]] = player
+        winner = check_win(board)
         if winner == 0 and len(possible_moves) > 1:
-            options = minimax(copy_board, change_player(player))
+            options = minimax(board, change_player(player))
             possible_moves[move] = get_better_option(options, player)
         else:
             possible_moves[move] = winner
 
-        copy_board[table[move][0]][table[move][1]] = move
+        board[table[move][0]][table[move][1]] = move
 
     return possible_moves
     
